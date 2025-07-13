@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Django server",
+            "type": "shell",
+            "command": "poetry run python manage.py runserver",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Django migrations",
+            "type": "shell",
+            "command": "poetry run python manage.py migrate",
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}
