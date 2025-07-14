@@ -1,5 +1,6 @@
 "use client";
 
+import GoogleLoginButton from "@/components/GoogleLoginButton";
 import { useState } from "react";
 import LoginForm from "../components/LoginForm";
 import LogoutButton from "../components/LogoutButton";
@@ -25,40 +26,43 @@ export default function Home() {
           <LogoutButton />
         </>
       ) : (
-        <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
-          <div className="mb-4">
-            <button
-              className="text-blue-600 underline"
-              onClick={() => setShowReset((v) => !v)}
-            >
-              Забули пароль?
-            </button>
-          </div>
-          {showReset ? (
-            !resetRequested ? (
-              <PasswordResetRequestForm
-                onSuccess={() => {
-                  setResetRequested(true);
-                  setResetEmail(resetEmail);
-                }}
-              />
-            ) : (
-              <PasswordResetConfirmForm email={resetEmail} />
-            )
-          ) : (
-            <>
-              {showRegister ? <RegisterForm /> : <LoginForm />}
+        <>
+          <GoogleLoginButton />
+          <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
+            <div className="mb-4">
               <button
-                className="mt-4 text-blue-600 underline"
-                onClick={() => setShowRegister((v) => !v)}
+                className="text-blue-600 underline"
+                onClick={() => setShowReset((v) => !v)}
               >
-                {showRegister
-                  ? "Вже є акаунт? Увійти"
-                  : "Немає акаунта? Зареєструватися"}
+                Забули пароль?
               </button>
-            </>
-          )}
-        </div>
+            </div>
+            {showReset ? (
+              !resetRequested ? (
+                <PasswordResetRequestForm
+                  onSuccess={() => {
+                    setResetRequested(true);
+                    setResetEmail(resetEmail);
+                  }}
+                />
+              ) : (
+                <PasswordResetConfirmForm email={resetEmail} />
+              )
+            ) : (
+              <>
+                {showRegister ? <RegisterForm /> : <LoginForm />}
+                <button
+                  className="mt-4 text-blue-600 underline"
+                  onClick={() => setShowRegister((v) => !v)}
+                >
+                  {showRegister
+                    ? "Вже є акаунт? Увійти"
+                    : "Немає акаунта? Зареєструватися"}
+                </button>
+              </>
+            )}
+          </div>
+        </>
       )}
     </main>
   );

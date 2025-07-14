@@ -69,6 +69,12 @@ class RegisterView(APIView):
                 {"detail": "Username and password required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # Email uniqueness check
+        if email and User.objects.filter(email=email).exists():
+            return Response(
+                {"detail": "Email already exists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             user = User.objects.create_user(
                 username=username, password=password, email=email, is_active=False
@@ -98,7 +104,7 @@ class RegisterView(APIView):
                 )
                 print("DEBUG: EMAIL SENT")
             except Exception as e:
-                logging.error(f"Email send error: {e}")
+                # logging.error(f"Email send error: {e}")
                 return Response({"detail": f"Email send error: {e}"}, status=500)
         return Response(
             {

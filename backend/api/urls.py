@@ -1,5 +1,6 @@
 from django.urls import path
 
+from .google_auth import GoogleAuthView
 from .views import (
     LoginView,
     LogoutView,
@@ -26,4 +27,5 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
+    path("google-login/", GoogleAuthView.as_view(), name="google_login"),
 ]
