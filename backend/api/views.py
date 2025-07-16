@@ -1,3 +1,6 @@
+import random
+from tokenize import TokenError
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -11,7 +14,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import VerificationCode
 
 
-# Endpoint для перевірки OTP-коду
 class VerifyCodeView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -46,7 +48,6 @@ class VerifyCodeView(APIView):
             return Response(
                 {"detail": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST
             )
-        # Активуємо користувача
         user.is_active = True
         user.save()
         vcode.is_used = True
@@ -69,10 +70,10 @@ class RegisterView(APIView):
                 {"detail": "Username and password required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Email uniqueness check
+
         if email and User.objects.filter(email=email).exists():
             return Response(
-                {"detail": "Email already exists"},
+                {"detail": "BAD_REQUEST"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
@@ -81,41 +82,32 @@ class RegisterView(APIView):
             )
         except IntegrityError:
             return Response(
-                {"detail": "Username already exists"},
+                {"detail": "BAD_REQUEST"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Генеруємо 6-значний код
-        import random
-
-        from .models import VerificationCode
 
         code = f"{random.randint(100000, 999999)}"
         VerificationCode.objects.create(user=user, code=code)
-        # Надсилаємо код на email з логуванням помилок
+
         if email:
             print(f"DEBUG: email={email}, code={code}")
             try:
                 send_mail(
                     subject="Ваш код підтвердження",
                     message=f"Ваш код для підтвердження реєстрації: {code}",
-                    from_email=None,  # Використає DEFAULT_FROM_EMAIL
+                    from_email=None,
                     recipient_list=[email],
                     fail_silently=False,
                 )
-                print("DEBUG: EMAIL SENT")
             except Exception as e:
                 # logging.error(f"Email send error: {e}")
                 return Response({"detail": f"Email send error: {e}"}, status=500)
         return Response(
             {
                 "detail": "Registration successful. Enter verification code.",
-                # Не повертаємо код у відповіді у production
             },
             status=status.HTTP_201_CREATED,
         )
-
-
-from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginView(APIView):
@@ -135,17 +127,21 @@ class LoginView(APIView):
                 key="access",
                 value=access_token,
                 httponly=True,
-                secure=True,
-                samesite="Strict",
+                secure=False,  # Для локальної розробки!
+                samesite="Lax",  # Для роботи між портами на localhost
                 max_age=300,
+                path="/",
+                domain=None,
             )
             response.set_cookie(
                 key="refresh",
                 value=str(refresh),
                 httponly=True,
-                secure=True,
-                samesite="Strict",
+                secure=False,  # <-- ДЛЯ ЛОКАЛЬНОЇ РОЗРОБКИ!
+                samesite="Lax",
                 max_age=86400,
+                path="/",
+                domain=None,
             )
             return response
         return Response(
@@ -196,7 +192,6 @@ class PasswordResetRequestView(APIView):
                 {"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND
             )
         code = f"{random.randint(100000, 999999)}"
-        # Зберігаємо код у VerificationCode (тип: reset)
         VerificationCode.objects.create(user=user, code=code, purpose="reset")
         send_mail(
             subject="Скидання пароля",
@@ -251,3 +246,27 @@ class PasswordResetConfirmView(APIView):
         return Response(
             {"detail": "Password reset successful"}, status=status.HTTP_200_OK
         )
+
+
+class RefreshTokenView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get("refresh")
+        if not refresh_token:
+            return Response({"detail": "No refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            refresh = RefreshToken(refresh_token)
+            access_token = str(refresh.access_token)
+            response = Response({"access": access_token}, status=status.HTTP_200_OK)
+            response.set_cookie(
+                key="access",
+                value=access_token,
+                httponly=True,
+                secure=False,  # Для локальної розробки
+                samesite="Lax",
+                max_age=300,
+                path="/",
+                domain=None,
+            )
+            return response
+        except TokenError as e:
+            return Response({"detail": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED)

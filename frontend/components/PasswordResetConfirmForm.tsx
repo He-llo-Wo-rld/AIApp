@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { useState } from "react";
 import api from "../lib/axios";
 
@@ -20,8 +21,9 @@ export default function PasswordResetConfirmForm() {
         new_password: newPassword,
       });
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Error");
+    } catch (err) {
+      const axiosError = err as AxiosError<{ detail?: string }>;
+      setError(axiosError.response?.data?.detail || "Error");
     } finally {
       setLoading(false);
     }

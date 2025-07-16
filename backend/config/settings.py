@@ -71,10 +71,12 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "api.middleware.JWTAuthCookieMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "axes.middleware.AxesMiddleware",  # Додаємо Axes
+    "axes.middleware.AxesMiddleware",
+    "api.middleware.RegistrationRequiredMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -179,7 +181,9 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
-
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
 
 # Email config from .env
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -191,8 +195,11 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
 
 # Secure cookies
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -204,9 +211,9 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
 
 # Django Axes config
-AXES_FAILURE_LIMIT = 5  # Максимум 5 невдалих спроб
-AXES_COOLOFF_TIME = 1  # Блокування на 1 година
-AXES_LOCKOUT_TEMPLATE = None  # Можна задати власний шаблон
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1
+AXES_LOCKOUT_TEMPLATE = None
 
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",

@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import api from "../lib/axios";
 import { useUserStore } from "../store/user";
@@ -9,12 +10,19 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const setAuthenticated = useUserStore((s) => s.setAuthenticated);
 
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     try {
-      await api.post("/login/", { username, password });
+      await api.post(
+        "/login/",
+        { username, password },
+        { withCredentials: true }
+      );
       setAuthenticated(true);
+      router.push("/");
     } catch (err: any) {
       setError(err?.response?.data?.detail || "Login failed");
       setAuthenticated(false);
