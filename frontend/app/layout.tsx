@@ -1,7 +1,9 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
 import AuthProvider from "../components/AuthProvider";
+import NavBar from "../components/NavBar";
 import ReactQueryProvider from "../components/ReactQueryProvider";
 import "./globals.css";
 
@@ -34,7 +36,10 @@ export default function RootLayout({
           clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
         >
           <ReactQueryProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <NavBar />
+              <div className="pt-14">{children}</div>
+            </AuthProvider>
           </ReactQueryProvider>
         </GoogleOAuthProvider>
       </body>
