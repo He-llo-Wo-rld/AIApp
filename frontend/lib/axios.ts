@@ -1,3 +1,4 @@
+import { useUserStore } from "@/store/user";
 import axios from "axios";
 
 const api = axios.create({
@@ -20,6 +21,7 @@ api.interceptors.response.use(
         await api.post("/token/refresh/");
         return api(originalRequest);
       } catch (refreshError) {
+        useUserStore.getState().setAuthenticated(false);
         return Promise.reject(refreshError);
       }
     }

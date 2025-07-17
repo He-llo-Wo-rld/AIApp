@@ -9,13 +9,16 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const setAuthenticated = useUserStore((s) => s.setAuthenticated);
+  const setLoading = useUserStore((s) => s.setLoading);
 
   useEffect(() => {
+    setLoading(true);
     api
       .get("/profile/")
       .then(() => setAuthenticated(true))
-      .catch(() => setAuthenticated(false));
-  }, [setAuthenticated]);
+      .catch(() => setAuthenticated(false))
+      .finally(() => setLoading(false));
+  }, [setAuthenticated, setLoading]);
 
   return <>{children}</>;
 }

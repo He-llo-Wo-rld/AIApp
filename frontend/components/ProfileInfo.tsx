@@ -6,7 +6,7 @@ export default function ProfileInfo() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      const res = await api.get("/profile/", { withCredentials: true });
+      const res = await api.get("/profile/");
       return res.data;
     },
     refetchOnWindowFocus: false,

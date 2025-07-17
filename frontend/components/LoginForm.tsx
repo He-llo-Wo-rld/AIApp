@@ -19,13 +19,11 @@ export default function LoginForm() {
       await api.post(
         "/login/",
         { username, password },
-        { withCredentials: true }
       );
       setAuthenticated(true);
       router.push("/");
     } catch (err: any) {
       setError(err?.response?.data?.detail || "Login failed");
-      setAuthenticated(false);
     }
   };
 
